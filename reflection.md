@@ -8,7 +8,7 @@
 2. Add care tasks like walks, feedings, or medications, each with a time estimate and a priority level.
 3. Generate a daily schedule. The user says how much free time they have and the app builds a plan and explains it.
 
-**Mermaid.js Class Diagram:**
+**Mermaid.js Class Diagram (final):**
 
 ```mermaid
 classDiagram
@@ -16,6 +16,7 @@ classDiagram
         +str name
         +int available_time_minutes
         +list preferences
+        +list pets
         +add_pet(pet)
         +get_pets() list
         +set_available_time(minutes)
@@ -38,22 +39,26 @@ classDiagram
         +str priority
         +str category
         +bool completed
-        +mark_complete()
+        +str start_time
+        +str frequency
+        +mark_complete() Task
     }
 
     class Scheduler {
         +Owner owner
-        +Pet pet
         +list scheduled_tasks
         +generate_schedule() list
-        +explain_plan() str
+        +sort_by_time() list
+        +filter_tasks(pet_name, completed) list
+        +detect_conflicts() list
+        +mark_task_complete(pet, task)
         +prioritize_tasks(tasks) list
+        +explain_plan() str
     }
 
     Owner "1" --> "0..*" Pet : owns
     Pet "1" --> "0..*" Task : has
     Scheduler --> Owner : uses
-    Scheduler --> Pet : uses
 ```
 
 **a. Initial design**
@@ -72,14 +77,17 @@ The `preferences` field on Owner is just a plain list which the Scheduler can't 
 
 The Scheduler originally took both owner and pet as separate arguments. During implementation I changed it to take only owner, so it can pull tasks from all of the owner's pets at once. The original version would have only handled one pet at a time which didn't match what the scheduler was supposed to do.
 
+Task also got two new fields -- `start_time` and `frequency` -- that weren't in the original design. Needed those to make sorting and recurrence work. `mark_complete` also changed to return a new Task instead of just returning nothing.
+
 ---
 
 ## 2. Scheduling Logic and Tradeoffs
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+The scheduler looks at two things: how much time the owner has and the priority level of each task. High priority tasks get picked first, then medium, then low. If something doesn't fit in the remaining time it just gets skipped. I didn't do anything with preferences yet since I wasn't sure what form they should take.
+
+Time felt like the most important constraint because thats the one with a hard ceiling. You can negotiate priority a little but you cant add more hours to the day.
 
 **b. Tradeoffs**
 
@@ -91,13 +99,13 @@ Conflict detection only flags tasks with the exact same start_time string. It wo
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+Used AI mostly for the initial class design and for generating test cases. The most helpful thing was asking it to brainstorm edge cases for the scheduler since I probably wouldve only thought of the happy path on my own. Also used it to figure out that `dataclasses.replace` was the right tool for copying a Task when handling recurrence.
+
+Asking narrow specific questions worked better than broad ones. Like "how do I copy a dataclass with one field changed" got a useful answer faster than "how should recurring tasks work."
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+At one point AI suggested using a dict keyed on Task objects for conflict detection. That doesnt work because dataclasses arent hashable by default so it would throw a TypeError at runtime. I caught it because I actually ran the code and it crashed. Switched to tracking seen start_times in a dict instead which is simpler anyway.
 
 ---
 
@@ -117,12 +125,12 @@ The suite has 9 tests covering task completion, recurring task re-adding, sort o
 
 **a. What went well**
 
-- What part of this project are you most satisfied with?
+The scheduler logic came together pretty cleanly. Having the UML done first made it obvious what each class needed to do and kept me from having to figure out structure and logic at the same time.
 
 **b. What you would improve**
 
-- If you had another iteration, what would you improve or redesign?
+The preferences field on Owner is basically a placeholder right now. If I had more time id make it something concrete like preferred task categories or a time-of-day preference so the scheduler could actually use it.
 
 **c. Key takeaway**
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+AI is really good at filling in boilerplate and suggesting patterns but it doesnt know what you actually want the system to do. You still have to understand the design well enough to catch when a suggestion technically works but doesnt fit. The conflict detection dict idea was a good example of that -- correct in other contexts, wrong for this one.

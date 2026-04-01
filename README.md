@@ -22,6 +22,20 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+## Features
+
+- Enter owner and pet info to personalize the schedule
+- Add tasks with a title, duration, priority, optional start time, and recurrence (none/daily/weekly)
+- Schedule is built by fitting high-priority tasks first within the owner's available time
+- Tasks sorted chronologically by start time in the output
+- Conflict warnings shown when two tasks share the same start time
+- Recurring tasks automatically re-add themselves when marked complete
+- Filter tasks by pet name or completion status
+
+## 📸 Demo
+
+<a href="/course_images/ai110/pawpal_screenshot.png" target="_blank"><img src='/course_images/ai110/pawpal_screenshot.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>
+
 ## Getting started
 
 ### Setup
