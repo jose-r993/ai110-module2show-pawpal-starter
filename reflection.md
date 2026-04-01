@@ -105,13 +105,11 @@ Conflict detection only flags tasks with the exact same start_time string. It wo
 
 **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+The suite has 9 tests covering task completion, recurring task re-adding, sort order, conflict detection, empty pet edge case, and filtering by pet name. The conflict and recurrence tests matter most because those are the behaviors most likely to break quietly without any error.
 
 **b. Confidence**
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+4 out of 5. The happy paths and main edge cases are solid. What's missing is overlap detection for tasks that don't share an exact start time but still run into each other, and any testing around the owner's available time running out mid-schedule.
 
 ---
 

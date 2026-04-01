@@ -41,6 +41,28 @@ The scheduler includes a few extra features beyond a basic priority sort:
 - **Recurring tasks** — tasks with `frequency="daily"` or `frequency="weekly"` automatically re-add themselves when marked complete.
 - **Conflict detection** — the scheduler scans for tasks assigned to the same start time and returns a warning instead of crashing.
 
+## Testing PawPal+
+
+Run the test suite with:
+
+```bash
+python -m pytest
+```
+
+The tests cover:
+
+- Marking a task complete updates its status
+- Adding a task to a pet increases the task count
+- Tasks sort into chronological order by start time
+- Daily tasks re-add themselves after being marked complete
+- One-off tasks do not re-add after completion
+- Conflict detection flags two tasks at the same time
+- No false conflict warnings when times are different
+- A pet with no tasks produces an empty schedule
+- Filtering by pet name returns only that pet's tasks
+
+Confidence level: ★★★★☆ — core behaviors are well covered. Overlapping duration conflicts and multi-day scheduling are not tested yet.
+
 ### Suggested workflow
 
 1. Read the scenario carefully and identify requirements and edge cases.
