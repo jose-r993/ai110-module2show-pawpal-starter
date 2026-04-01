@@ -2,15 +2,73 @@
 
 ## 1. System Design
 
+**Three core user actions:**
+
+1. Add a pet by entering its name, species, age, and any health notes.
+2. Add care tasks like walks, feedings, or medications, each with a time estimate and a priority level.
+3. Generate a daily schedule. The user says how much free time they have and the app builds a plan and explains it.
+
+**Mermaid.js Class Diagram:**
+
+```mermaid
+classDiagram
+    class Owner {
+        +str name
+        +int available_time_minutes
+        +list preferences
+        +add_pet(pet)
+        +get_pets() list
+        +set_available_time(minutes)
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +int age
+        +str health_notes
+        +list tasks
+        +add_task(task)
+        +get_tasks() list
+        +remove_task(task_title)
+    }
+
+    class Task {
+        +str title
+        +int duration_minutes
+        +str priority
+        +str category
+        +bool completed
+        +mark_complete()
+    }
+
+    class Scheduler {
+        +Owner owner
+        +Pet pet
+        +list scheduled_tasks
+        +generate_schedule() list
+        +explain_plan() str
+        +prioritize_tasks(tasks) list
+    }
+
+    Owner "1" --> "0..*" Pet : owns
+    Pet "1" --> "0..*" Task : has
+    Scheduler --> Owner : uses
+    Scheduler --> Pet : uses
+```
+
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+I went with four classes. Owner stores the person's name, how much time they have in the day, and preferences. It holds a list of their pets.
+
+Pet tracks the animal's basic info (name, species, age, health notes) and keeps its own list of tasks.
+
+Task is a dataclass representing one care item. It has a title, duration in minutes, priority (low/medium/high), a category, and a flag for whether it's done. The field names line up with what app.py already uses so hooking into the UI later shouldn't need much rework.
+
+Scheduler is where the planning happens. It takes an Owner and a Pet, looks at the available time, and decides which tasks to include and in what order. It also has a method to explain why the plan looks the way it does.
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+_To be filled in after implementation or AI feedback reveals issues._
 
 ---
 
