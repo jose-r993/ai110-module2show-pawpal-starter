@@ -32,6 +32,15 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+## Smarter Scheduling
+
+The scheduler includes a few extra features beyond a basic priority sort:
+
+- **Sort by time** — tasks with a `start_time` (HH:MM) get ordered chronologically. Tasks without one go last.
+- **Filter tasks** — filter by pet name or completion status to get a focused view of what's done or pending.
+- **Recurring tasks** — tasks with `frequency="daily"` or `frequency="weekly"` automatically re-add themselves when marked complete.
+- **Conflict detection** — the scheduler scans for tasks assigned to the same start time and returns a warning instead of crashing.
+
 ### Suggested workflow
 
 1. Read the scenario carefully and identify requirements and edge cases.

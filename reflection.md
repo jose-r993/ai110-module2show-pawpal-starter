@@ -68,7 +68,9 @@ Scheduler is where the planning happens. It takes an Owner and a Pet, looks at t
 
 **b. Design changes**
 
-_To be filled in after implementation or AI feedback reveals issues._
+The `preferences` field on Owner is just a plain list which the Scheduler can't really use yet. I'll make it more specific once I know what preferences actually matter.
+
+The Scheduler originally took both owner and pet as separate arguments. During implementation I changed it to take only owner, so it can pull tasks from all of the owner's pets at once. The original version would have only handled one pet at a time which didn't match what the scheduler was supposed to do.
 
 ---
 
@@ -81,8 +83,7 @@ _To be filled in after implementation or AI feedback reveals issues._
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+Conflict detection only flags tasks with the exact same start_time string. It won't catch two tasks that overlap but start at different times, like one that starts at 08:00 for 30 minutes and another at 08:15. For a simple pet care app this is fine since most owners think in rough time slots anyway, but it would be a problem if precise scheduling mattered.
 
 ---
 

@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, replace
 
 
 PRIORITY_ORDER = {"high": 0, "medium": 1, "low": 2}
@@ -12,10 +12,15 @@ class Task:
     priority: str
     category: str = ""
     completed: bool = False
+    start_time: str = ""
+    frequency: str = "none"
 
     def mark_complete(self):
-        """Mark this task as done."""
+        """Mark this task done. Returns a new Task if it recurs, otherwise None."""
         self.completed = True
+        if self.frequency != "none":
+            return replace(self, completed=False)
+        return None
 
 
 class Pet:
@@ -72,8 +77,7 @@ class Scheduler:
 
     def prioritize_tasks(self, tasks):
         """Sort tasks by priority (high first) then by duration."""
-        sorted_tasks = sorted(tasks, key=lambda t: (PRIORITY_ORDER.get(t.priority, 99), t.duration_minutes))
-        return sorted_tasks
+        return sorted(tasks, key=lambda t: (PRIORITY_ORDER.get(t.priority, 99), t.duration_minutes))
 
     def generate_schedule(self):
         """Fill the schedule with tasks that fit within the owner's available time."""
@@ -94,6 +98,45 @@ class Scheduler:
 
         return self.scheduled_tasks
 
+    def sort_by_time(self):
+        """Sort scheduled tasks by start_time. Tasks with no start_time go last."""
+        self.scheduled_tasks.sort(key=lambda pair: pair[1].start_time if pair[1].start_time else "99:99")
+        return self.scheduled_tasks
+
+    def filter_tasks(self, pet_name=None, completed=None):
+        """Return tasks filtered by pet name and/or completion status."""
+        results = []
+        for pet in self.owner.get_pets():
+            if pet_name is not None and pet.name != pet_name:
+                continue
+            for task in pet.get_tasks():
+                if completed is not None and task.completed != completed:
+                    continue
+                results.append((pet, task))
+        return results
+
+    def detect_conflicts(self):
+        """Return a list of warnings for tasks scheduled at the same time."""
+        warnings = []
+        seen = {}
+        for pet, task in self.scheduled_tasks:
+            if not task.start_time:
+                continue
+            if task.start_time in seen:
+                other_pet, other_task = seen[task.start_time]
+                warnings.append(
+                    f"Conflict at {task.start_time}: '{task.title}' ({pet.name}) and '{other_task.title}' ({other_pet.name})"
+                )
+            else:
+                seen[task.start_time] = (pet, task)
+        return warnings
+
+    def mark_task_complete(self, pet, task):
+        """Mark a task complete and re-add it to the pet if it recurs."""
+        new_task = task.mark_complete()
+        if new_task is not None:
+            pet.add_task(new_task)
+
     def explain_plan(self):
         """Return a readable summary of the scheduled tasks."""
         if not self.scheduled_tasks:
@@ -103,6 +146,7 @@ class Scheduler:
         lines = [f"Daily plan for {self.owner.name} ({total} min total)\n"]
 
         for pet, task in self.scheduled_tasks:
-            lines.append(f"  [{task.priority.upper()}] {task.title} - {task.duration_minutes} min ({pet.name})")
+            time_label = f" @ {task.start_time}" if task.start_time else ""
+            lines.append(f"  [{task.priority.upper()}] {task.title} - {task.duration_minutes} min ({pet.name}){time_label}")
 
         return "\n".join(lines)
